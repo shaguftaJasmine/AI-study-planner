@@ -1,7 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import { supabase } from './supabaseClient.js';
 import { generateStudySchedule, generateAISuggestions } from './aiLogic.js';
+
+dotenv.config({ path: '../.env' });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
