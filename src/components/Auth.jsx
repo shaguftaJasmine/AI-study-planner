@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { BookOpen, Mail, Lock, Sparkles } from 'lucide-react';
+import { BookOpen, Mail, Lock, Sparkles, AlertCircle } from 'lucide-react';
 
 export default function Auth({ onAuthSuccess }) {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
       if (isSignUp) {
@@ -19,7 +21,9 @@ export default function Auth({ onAuthSuccess }) {
           password,
         });
         if (error) throw error;
-        alert('Account created successfully! Please sign in.');
+        setError('Account created successfully! Please sign in.');
+        setEmail('');
+        setPassword('');
         setIsSignUp(false);
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -29,8 +33,9 @@ export default function Auth({ onAuthSuccess }) {
         if (error) throw error;
         onAuthSuccess(data.user);
       }
-    } catch (error) {
-      alert(error.message);
+    } catch (err) {
+      console.error('Auth error:', err);
+      setError(err.message || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -73,6 +78,21 @@ export default function Auth({ onAuthSuccess }) {
               Sign Up
             </button>
           </div>
+
+          {error && (
+            <div className={`mb-4 p-4 rounded-lg flex items-start gap-3 ${
+              error.includes('success')
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}>
+              <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                error.includes('success') ? 'text-green-600' : 'text-red-600'
+              }`} />
+              <p className={error.includes('success') ? 'text-green-800' : 'text-red-800'}>
+                {error}
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
